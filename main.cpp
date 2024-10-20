@@ -1,5 +1,5 @@
 
-// Ver: 1.0.0
+// Ver: 1.0.1
 
 #include <iostream>
 #include <fstream>
@@ -315,9 +315,7 @@ void solicitarQualidade() {
             qualidade = input; // Armazena a qualidade em maiúsculas
             break; // Sai do loop se a entrada for válida
         } else {
-            cout << "Erro: qualidade inválida. Aceitas apenas SD, HD ou FHD." << endl;
-            this_thread::sleep_for(chrono::seconds(3)); // Aguarda 3 segundos
-            limparTela(); // Limpa a tela
+            cout << "Erro: qualidade inválida. Aceitas apenas SD, HD ou FHD.\nTente Novamente!" << endl;           
         }
     }
 }
@@ -390,6 +388,12 @@ int main() {
     limparTela();
     mostrarArquivoGerado("lista.txt");
 
+    // Aguardar 5 segundos antes de encerrar o programa
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
+    // Limpar a tela
+    limparTela();
+
+    // Encerrar o programa
     return 0;
 }
