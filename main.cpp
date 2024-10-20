@@ -1,4 +1,6 @@
 
+// Ver: 1.0.0
+
 #include <iostream>
 #include <fstream>
 #include <vector>
