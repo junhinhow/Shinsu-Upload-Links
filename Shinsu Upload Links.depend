@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1729272221 source:c:\users\administrator\downloads\apagar\animes\c\shinsu upload links\main.cpp
+	<iostream>
+	<fstream>
+	<vector>
+	<string>
+	<algorithm>
+	<clocale>
+	<regex>
+	<thread>
+	<chrono>
+	<cstdlib>
+
