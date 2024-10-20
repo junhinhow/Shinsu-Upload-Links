@@ -3,22 +3,22 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <algorithm> // Para a função remove
+#include <algorithm> // Para a funÃ§Ã£o remove
 #include <clocale>   // Para setlocale
-#include <regex>     // Para expressões regulares
+#include <regex>     // Para expressÃµes regulares
 #include <thread>    // Para std::this_thread::sleep_for
 #include <chrono>    // Para std::chrono::seconds
 #include <cstdlib>   // Para system
 
 using namespace std;
 
-// Variáveis globais
+// VariÃ¡veis globais
 int quantidadeEpisodios, quantidadeServidores, episodioInicial;
 vector<string> thumbs;
 vector<vector<string>> servidores;
-string qualidade; // Agora é uma única qualidade para todos os episódios
+string qualidade; // Uma Ãºnica qualidade para todos os episÃ³dios
 
-// Função auxiliar para remover espaços em branco no início e no final da string
+// FunÃ§o auxiliar para remover espaÃ§os em branco no inÃ­cio e no final da string
 string trim(const string& str) {
     size_t first = str.find_first_not_of(" \t");
     if (first == string::npos) return "";
@@ -26,23 +26,23 @@ string trim(const string& str) {
     return str.substr(first, (last - first + 1));
 }
 
-// Função para tratar os links das thumbs
+// FunÃ§Ã£o para tratar os links das thumbs
 string tratarLinkThumbs(string link) {
     link.erase(remove(link.begin(), link.end(), ' '), link.end());
 
     if (link.substr(0, 7) != "http://" && link.substr(0, 8) != "https://") {
-        cout << "Link inválido: " << link << " (certifique-se de que começa com http:// ou https://)" << endl;
+        cout << "Link invlido: " << link << " (certifique-se de que comeÃ§a com http:// ou https://)" << endl;
         return "";
     }
 
-    // Verificação do formato do link
+    // VerificaÃ§Ã£o do formato do link
     if (link.find("/original/") == string::npos) {
         if (link.find("/w227_and_h127_bestv2/") != string::npos) {
             link.replace(link.find("/w227_and_h127_bestv2/"), 24, "/original/");
         }
     }
 
-    // Adiciona .jpg apenas se for um link válido
+    // Adiciona .jpg apenas se for um link vÃ¡lido
     if (link.size() >= 4 && link.substr(link.size() - 4) != ".jpg") {
         link += ".jpg";
     }
@@ -50,7 +50,7 @@ string tratarLinkThumbs(string link) {
     return link;
 }
 
-// Função para remover hífens e colchetes de qualidade do link
+// FunÃ§Ã£o para remover hÃ­fens e colchetes de qualidade do link
 string removerHifenEColchetes(string link) {
     link.erase(remove(link.begin(), link.end(), '-'), link.end());
 
@@ -82,37 +82,37 @@ string removerHifenEColchetes(string link) {
     return link;
 }
 
-// Função auxiliar para extrair o código único de um link
+// FunÃ§Ã£o auxiliar para extrair o cÃ³digo Ãºnico de um link
 string extractCode(const string& link, const string& identifier) {
     size_t posStart = link.find(identifier);
-    if (posStart == string::npos) return ""; // Identificador não encontrado
+    if (posStart == string::npos) return ""; // Identificador nÃ£o encontrado
 
     posStart += identifier.length();
-    size_t posEnd = link.find("/", posStart); // Procurar pelo próximo "/"
+    size_t posEnd = link.find("/", posStart); // Procurar pelo prÃ³ximo "/"
 
-    // Se não houver outro "/", considerar o final da string
+    // Se nÃ£o houver outro "/", considerar o final da string
     return (posEnd == string::npos) ? link.substr(posStart) : link.substr(posStart, posEnd - posStart);
 }
 
-// Função para tratar os links dos servidores
+// FunÃ§Ã£o para tratar os links dos servidores
 string tratarLinkServidor(string link) {
-    // Remove espaços no início e no final do link
+    // Remove espaÃ§os no inÃ­cio e no final do link
     link = trim(link);
 
-    // Remove hífens e colchetes
+    // Remove hÃ­fens e colchetes
     link = removerHifenEColchetes(link);
 
     string uniqueCode;
 
-    // Verificar qual servidor está sendo utilizado pelo link
+    // Verificar qual servidor estÃ¡ sendo utilizado pelo link
     if (link.find("mp4upload.com") != string::npos) {
         uniqueCode = extractCode(link, "embed-");
         if (uniqueCode.empty()) {
             uniqueCode = extractCode(link, "mp4upload.com/");
         }
 
-        // Remove "embed" do início do uniqueCode, se presente
-        if (uniqueCode.rfind("embed", 0) == 0) { // Verifica se "embed" está no início
+        // Remove "embed" do inÃ­cio do uniqueCode, se presente
+        if (uniqueCode.rfind("embed", 0) == 0) { // Verifica se "embed" estÃ¡ no inÃ­cio
             uniqueCode.erase(0, 5); // Remove os 5 caracteres da palavra "embed"
         }
 
@@ -120,12 +120,12 @@ string tratarLinkServidor(string link) {
             link = "https://www.mp4upload.com/embed-" + uniqueCode + ".html"; // O link final agora deve estar correto
         }
 
-        // Verificar se há múltiplos ".html" no final e remover os excedentes
+        // Verificar se hÃ¡ mÃºltiplos ".html" no final e remover os excedentes
         while (link.size() >= 10 && link.substr(link.size() - 10) == ".html.html") {
-            link.erase(link.size() - 5); // Remove o último ".html"
+            link.erase(link.size() - 5); // Remove o Ãºltimo ".html"
         }
     } else if (link.find("mixdrop.is") != string::npos || link.find("mixdrop.ps") != string::npos) {
-            // Tenta extrair o código de qualquer uma das variantes
+            // Tenta extrair o cÃ³digo de qualquer uma das variantes
             uniqueCode = extractCode(link, "mixdrop.is/e/");
             if (uniqueCode.empty()) {
                 uniqueCode = extractCode(link, "mixdrop.is/f/");
@@ -138,9 +138,9 @@ string tratarLinkServidor(string link) {
                 link = "https://mixdrop.ps/e/" + uniqueCode;
             }
     } else if (link.find("streamtape.com") != string::npos || link.find("streamtape.to") != string::npos) {
-        // Verifica se o link já está no formato embed "/e/"
+        // Verifica se o link jÃ¡ estÃ¡ no formato embed "/e/"
         if (link.find("/e/") == string::npos) {
-            // Extrai o código único de "/v/" ou "/e/"
+            // Extrai o cÃ³digo Ãºnico de "/v/" ou "/e/"
             uniqueCode = extractCode(link, "streamtape.com/v/");
             if (uniqueCode.empty()) {
                 uniqueCode = extractCode(link, "streamtape.com/e/");
@@ -164,36 +164,36 @@ string tratarLinkServidor(string link) {
             link = "https://filemoon.sx/e/" + uniqueCode;
         }
     } else if (link.find("yourupload.com") != string::npos) {
-        // Verifica se o link contém "/watch/" e extrai o código
+        // Verifica se o link contÃ©m "/watch/" e extrai o cÃ³digo
         uniqueCode = extractCode(link, "/watch/");
 
-        // Se não foi encontrado, tenta extrair do formato embed
+        // Se nÃ£o foi encontrado, tenta extrair do formato embed
         if (uniqueCode.empty()) {
             uniqueCode = extractCode(link, "/embed/");
         }
 
-        // Se o código único foi encontrado, forma o link no formato embed
+        // Se o cÃ³digo Ãºnico foi encontrado, forma o link no formato embed
         if (!uniqueCode.empty()) {
             link = "https://www.yourupload.com/embed/" + uniqueCode;
         } else {
-            cout << "Código único não encontrado no link: " << link << endl;
-            return ""; // Retorna vazio se nenhum código foi encontrado
+            cout << "CÃ³digo Ãºnico nÃ£o encontrado no link: " << link << endl;
+            return ""; // Retorna vazio se nenhum cÃ³digo foi encontrado
         }
     } else if (link.find("linkbox.to") != string::npos || link.find("lbx.to") != string::npos) {
-        // Extrai o código único do link
+        // Extrai o cÃ³digo Ãºnico do link
         uniqueCode = extractCode(link, "/f/");
 
-        // Se não encontrou com "f/", tenta extrair com "a/f/"
+        // Se nÃ£o encontrou com "f/", tenta extrair com "a/f/"
         if (uniqueCode.empty()) {
             uniqueCode = extractCode(link, "a/f/");
         }
 
-        // Se o código único foi encontrado, forma o link no formato desejado
+        // Se o cÃ³digo Ãºnico foi encontrado, forma o link no formato desejado
         if (!uniqueCode.empty()) {
             link = "https://www.linkbox.to/a/f/" + uniqueCode;
         } else {
-            cout << "Código único não encontrado no link: " << link << endl;
-            return ""; // Retorna vazio se nenhum código foi encontrado
+            cout << "CÃ³digo Ãºnico nÃ£o encontrado no link: " << link << endl;
+            return ""; // Retorna vazio se nenhum cÃ³digo foi encontrado
         }
     } else if (link.find("upstream.to") != string::npos) {
         uniqueCode = extractCode(link, "embed-");
@@ -201,41 +201,41 @@ string tratarLinkServidor(string link) {
             uniqueCode = extractCode(link, "upstream.to/");
         }
 
-        // Remove "embed" do início do uniqueCode, se presente
-        if (uniqueCode.rfind("embed", 0) == 0) { // Verifica se "embed" está no início
+        // Remove "embed" do inÃ­cio do uniqueCode, se presente
+        if (uniqueCode.rfind("embed", 0) == 0) { // Verifica se "embed" estÃ¡ no inÃ­cio
             uniqueCode.erase(0, 5); // Remove os 5 caracteres da palavra "embed"
         }
 
         if (!uniqueCode.empty()) {
             link = "https://upstream.to/embed-" + uniqueCode + ".html"; // O link final agora deve estar correto
         }
-        // Verificar se há múltiplos ".html" no final e remover os excedentes
+        // Verificar se hÃ¡ mÃºltiplos ".html" no final e remover os excedentes
         while (link.size() >= 10 && link.substr(link.size() - 10) == ".html.html") {
-            link.erase(link.size() - 5); // Remove o último ".html"
+            link.erase(link.size() - 5); // Remove o Ãºltimo ".html"
         }
     } else if (link.find("streamwish.com") != string::npos) {
-        // Extrai o código único
+        // Extrai o cÃ³digo Ãºnico
         uniqueCode = extractCode(link, "streamwish.com/d/");
         if (!uniqueCode.empty()) {
             link = "https://playerwish.com/e/" + uniqueCode;
         }
     } else if (link.find("playerwish.com") != string::npos) {
-        // O link já está no formato playerwish.com, então só extrai o código para garantir o formato correto
+        // O link jÃ¡ estÃ¡ no formato playerwish.com, entÃ£o sÃ³ extrai o cÃ³digo para garantir o formato correto
         uniqueCode = extractCode(link, "playerwish.com/e/");
         if (!uniqueCode.empty()) {
             link = "https://playerwish.com/e/" + uniqueCode;
         }
     } else {
-        cout << "Servidor desconhecido ou formato do link inválido." << endl;
+        cout << "Servidor desconhecido ou formato do link invÃ¡lido." << endl;
         return "";
     }
 
     return link; // Retorna o link tratado
 }
 
-// Função para capturar os links das thumbs
+// FunÃ§Ã£o para capturar os links das thumbs
 void capturarThumbs() {
-    cout << "Digite os links das Thumbs (precisa informar um link válido para cada episódio):" << endl;
+    cout << "Digite os links das Thumbs (precisa informar um link vÃ¡lido para cada episÃ³dio):" << endl;
     cin.ignore(); // Ignora qualquer caractere de nova linha deixado no buffer pelo cin anterior
 
     int capturados = 0;
@@ -245,7 +245,7 @@ void capturarThumbs() {
         getline(cin, thumb);
 
         if (thumb == "0") {
-            cout << "Você precisa capturar " << quantidadeEpisodios << " links. Ainda faltam " << (quantidadeEpisodios - capturados) << " links." << endl;
+            cout << "VocÃª precisa capturar " << quantidadeEpisodios << " links. Ainda faltam " << (quantidadeEpisodios - capturados) << " links." << endl;
             continue;
         }
 
@@ -254,19 +254,19 @@ void capturarThumbs() {
             thumbs.push_back(linkTratado);
             capturados++;
         } else {
-            cout << "Link inválido. Por favor, tente novamente." << endl;
+            cout << "Link invÃ¡lido. Por favor, tente novamente." << endl;
         }
     }
 
     cout << "Todos os links de thumbs capturados com sucesso!" << endl;
 }
 
-// Função para capturar os links dos servidores
+// FunÃ§Ã£o para capturar os links dos servidores
 void capturarServidores() {
     servidores.resize(quantidadeServidores);
 
     for (int i = 0; i < quantidadeServidores; ++i) {
-        cout << "Digite os links do servidor " << (i + 1) << " (precisa informar um link válido para cada episódio):" << endl;
+        cout << "Digite os links do servidor " << (i + 1) << " (precisa informar um link vÃ¡lido para cada episÃ³dio):" << endl;
         int capturados = 0;
 
         while (capturados < quantidadeEpisodios) {
@@ -274,7 +274,7 @@ void capturarServidores() {
             getline(cin, servidor);
 
             if (servidor == "0") {
-                cout << "Você precisa capturar " << quantidadeEpisodios << " links. Ainda faltam " << (quantidadeEpisodios - capturados) << " links para o servidor " << (i + 1) << "." << endl;
+                cout << "VocÃª precisa capturar " << quantidadeEpisodios << " links. Ainda faltam " << (quantidadeEpisodios - capturados) << " links para o servidor " << (i + 1) << "." << endl;
                 continue;
             }
 
@@ -283,7 +283,7 @@ void capturarServidores() {
                 servidores[i].push_back(linkTratado);
                 capturados++;
             } else {
-                cout << "Link inválido. Por favor, tente novamente." << endl;
+                cout << "Link invÃ¡lido. Por favor, tente novamente." << endl;
             }
         }
 
@@ -291,36 +291,36 @@ void capturarServidores() {
     }
 }
 
-// Função para limpar a tela
+// FunÃ§Ã£o para limpar a tela
 void limparTela() {
     system("clear || cls"); // 'clear' para Linux e 'cls' para Windows
 }
 
-// Função para solicitar a qualidade dos episódios
+// FunÃ§Ã£o para solicitar a qualidade dos episÃ³dios
 void solicitarQualidade() {
     while (true) {
-        cout << "Digite a qualidade dos episódios (SD/HD/FHD): ";
+        cout << "Digite a qualidade dos episÃ³dios (SD/HD/FHD): ";
         string input;
         cin >> input;
 
-        // Converter para maiúsculas
+        // Converter para maiÃºsculas
         for (char &c : input) {
             c = toupper(c);
         }
 
-        // Verificar se a qualidade está entre as opções válidas
+        // Verificar se a qualidade estÃ¡ entre as opÃ§Ãµes vÃ¡lidas
         if (input == "SD" || input == "HD" || input == "FHD") {
-            qualidade = input; // Armazena a qualidade em maiúsculas
-            break; // Sai do loop se a entrada for válida
+            qualidade = input; // Armazena a qualidade em maiÃºsculas
+            break; // Sai do loop se a entrada for vÃ¡lida
         } else {
-            cout << "Erro: qualidade inválida. Aceitas apenas SD, HD ou FHD." << endl;
+            cout << "Erro: qualidade invÃ¡lida. Aceitas apenas SD, HD ou FHD." << endl;
             this_thread::sleep_for(chrono::seconds(3)); // Aguarda 3 segundos
             limparTela(); // Limpa a tela
         }
     }
 }
 
-// Função para gerar o arquivo "lista.txt"
+// FunÃ§Ã£o para gerar o arquivo "lista.txt"
 void gerarArquivo() {
     ofstream arquivo("lista.txt");
     if (arquivo.is_open()) {
@@ -335,7 +335,7 @@ void gerarArquivo() {
                 arquivo << "thumb: " << thumbs[i-episodioInicial] << endl;
             }
 
-            // Adiciona "----------" apenas se não for o último ID
+            // Adiciona "----------" apenas se nÃ£o for o Ãºltimo ID
             if ((i-episodioInicial) < quantidadeEpisodios - 1) {
                 arquivo << "----------" << endl;
             }
@@ -343,12 +343,12 @@ void gerarArquivo() {
         arquivo.close();
         cout << "Arquivo 'lista.txt' gerado com sucesso!" << endl;
     } else {
-        cout << "Não foi possível abrir o arquivo para escrita." << endl;
+        cout << "nÃ£o foi possÃ­vel abrir o arquivo para escrita." << endl;
     }
 }
 
 
-// Função para mostrar o conteúdo do arquivo gerado
+// FunÃ§Ã£o para mostrar o conteÃºdo do arquivo gerado
 void mostrarArquivoGerado(const string& nomeArquivo) {
     ifstream arquivo(nomeArquivo);
     if (arquivo.is_open()) {
@@ -358,20 +358,20 @@ void mostrarArquivoGerado(const string& nomeArquivo) {
         }
         arquivo.close();
     } else {
-        cout << "Não foi possível abrir o arquivo: " << nomeArquivo << endl;
+        cout << "NÃ£o foi possÃ­vel abrir o arquivo: " << nomeArquivo << endl;
     }
 }
 
 int main() {
-    // Define a localização para UTF-8
+    // Define a localizaÃ§Ã£o para UTF-8
     setlocale(LC_ALL, "pt_BR.UTF-8");
 
-    // Solicitar quantidade de episódios
-    cout << "Digite a quantidade de episódios: ";
+    // Solicitar quantidade de episÃ³dios
+    cout << "Digite a quantidade de episÃ³dios: ";
     cin >> quantidadeEpisodios;
     cin.ignore(); // Ignora o newline deixado pelo cin
 
-    cout << "Digite o número do episódio inicial: ";
+    cout << "Digite o nÃºmero do episÃ³dio inicial: ";
     cin >> episodioInicial;
     cin.ignore(); // Ignora o newline deixado pelo cin
 
@@ -380,7 +380,7 @@ int main() {
     cin >> quantidadeServidores;
     cin.ignore(); // Ignora o newline deixado pelo cin
 
-    // Chamar funções
+    // Chamar funÃ§Ãµes
     solicitarQualidade();
     capturarThumbs();
     capturarServidores();
