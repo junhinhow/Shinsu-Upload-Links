@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Compilar Projeto C",
+      "type": "shell",
+      "command": "gcc",
+      "args": [
+        "-g",
+        "*.c",   // ou especifique os arquivos C
+        "-o",
+        "output.exe" // para Linux, pode ser apenas "output"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}
